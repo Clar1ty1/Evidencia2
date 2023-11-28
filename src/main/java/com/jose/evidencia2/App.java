@@ -8,7 +8,10 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
@@ -28,11 +31,17 @@ public class App extends Application {
     ArrayList<Colony> colonies = new ArrayList<Colony>();
     ArrayList<Central> centrals = new ArrayList<Central>();
     ArrayList<Link> links = new ArrayList<Link>();
+    Group mainGroup;
     Stage stage;
-    double SCREEN_HEIGHT = 500;
-    double SCREEN_WIDTH = 800;
+    double SCREEN_HEIGHT = 800;
+    double SCREEN_WIDTH = 1200;
     double BUTTON_WIDTH = 120;
-    
+    double CANVAS_WIDTH = SCREEN_WIDTH / 4;
+    double canvasSpacing = (SCREEN_WIDTH - CANVAS_WIDTH * 4) / 5;
+    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 4) / 5;
+
+
+
     @Override
     public void start(Stage stage) {
         this.stage = stage;
@@ -58,12 +67,10 @@ public class App extends Application {
         Button saveGraph = new Button("Guardar grafo");
         saveGraph.setMaxWidth(BUTTON_WIDTH);
         saveGraph.setMinWidth(BUTTON_WIDTH);
-        
-        double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 4) / 5; 
-        
+
         double pos = 0;
-        
         pos = pos + spacing;
+
         loadGraphButton.setTranslateX(pos);
         loadGraphButton.setTranslateY(50);
         loadGraphButton.setOnAction( new EventHandler<ActionEvent>() {
@@ -87,11 +94,11 @@ public class App extends Application {
         saveGraph.setTranslateX(pos);
         saveGraph.setTranslateY(50);
      
-        Group group = new Group();
+        mainGroup = new Group();
         
-        group.getChildren().addAll(loadGraphButton, addColony, deleteColony, saveGraph, label1);
+        mainGroup.getChildren().addAll(loadGraphButton, addColony, deleteColony, saveGraph, label1);
 
-        Scene scene = new Scene(group, SCREEN_WIDTH, SCREEN_HEIGHT);
+        Scene scene = new Scene(mainGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         
         stage.setScene(scene);
         
@@ -145,14 +152,33 @@ public class App extends Application {
                 int y = central.getAsJsonObject().get("y").getAsInt();
                 this.centrals.add( new Central( x, y ));
             }
-
-            System.out.println(this.colonies.size());
-            System.out.println(this.links.size());
-            System.out.println(this.centrals.size());
+            drawGraph();
         }
         catch (IOException ex) {
             System.out.println(ex);
         }
+    }
+
+    private void drawGraph() {
+        Canvas canvas = new Canvas(SCREEN_WIDTH-20, SCREEN_HEIGHT-10);
+        canvas.setTranslateY(100);
+        canvas.setTranslateX(10);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setFill(Color.GRAY);
+        gc.setStroke(Color.BLACK);
+        gc.fillRect(0, 0, SCREEN_WIDTH-20, SCREEN_HEIGHT-11);
+        gc.strokeRect(0, 0, SCREEN_WIDTH-20, SCREEN_HEIGHT-11);
+        gc.setFill(Color.BLUE);
+        for (Colony colony : colonies ) {
+            gc.fillOval(colony.getX(), colony.getY(), 8, 8);
+        }
+        gc.setFill(Color.RED);
+        for( Central central: centrals ) {
+            gc.fillOval(central.getX(), central.getY(), 8, 8);
+        }
+
+        mainGroup.getChildren().add(canvas);
+
     }
 
     public static void main(String[] args) {
