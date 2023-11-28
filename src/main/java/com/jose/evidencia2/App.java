@@ -1,24 +1,23 @@
 package com.jose.evidencia2;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 
 /**
@@ -146,6 +145,8 @@ public class App extends Application {
                 this.centrals.add( new Central( x, y ));
             }
 
+
+
             System.out.println(this.colonies.size());
             System.out.println(this.links.size());
             System.out.println(this.centrals.size());
@@ -157,6 +158,7 @@ public class App extends Application {
 
     public static void main(String[] args) {
         launch();
+
     }
 
 }
