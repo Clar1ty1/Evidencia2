@@ -40,7 +40,7 @@ public class App extends Application {
     double BUTTON_WIDTH = 120;
     double CANVAS_WIDTH = SCREEN_WIDTH / 4;
     double canvasSpacing = (SCREEN_WIDTH - CANVAS_WIDTH * 4) / 5;
-    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 4) / 5;
+    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 5) / 6;
 
 
 
@@ -57,6 +57,10 @@ public class App extends Application {
         Button loadGraphButton = new Button("Cargar grafo");
         loadGraphButton.setMaxWidth(BUTTON_WIDTH);
         loadGraphButton.setMinWidth(BUTTON_WIDTH);
+
+        Button loadVoronoiDiagram = new Button("Diagrama Voronoi");
+        loadVoronoiDiagram.setMaxWidth(BUTTON_WIDTH);
+        loadVoronoiDiagram.setMinWidth(BUTTON_WIDTH);
         
         Button addColony = new Button("Añadir colonia");        
         addColony.setMaxWidth(BUTTON_WIDTH);
@@ -80,9 +84,18 @@ public class App extends Application {
             public void handle(ActionEvent event) {
 
                 loadGraph();
-                new Voronoi(SCREEN_HEIGHT, SCREEN_WIDTH, colonies,   centrals).getVoronoi(stage);
 
 
+            }
+        });
+
+        pos = pos + BUTTON_WIDTH + spacing;
+        loadVoronoiDiagram.setTranslateX(pos);
+        loadVoronoiDiagram.setTranslateY(50);
+        loadVoronoiDiagram.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                drawVoronoi();
             }
         });
         
@@ -95,14 +108,13 @@ public class App extends Application {
         deleteColony.setTranslateX(pos);
         deleteColony.setTranslateY(50);
         
-        
         pos = pos + BUTTON_WIDTH + spacing;
         saveGraph.setTranslateX(pos);
         saveGraph.setTranslateY(50);
      
         mainGroup = new Group();
         
-        mainGroup.getChildren().addAll(loadGraphButton, addColony, deleteColony, saveGraph, label1);
+        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram,  addColony, deleteColony, saveGraph, label1);
 
         Scene scene = new Scene(mainGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         
@@ -120,7 +132,7 @@ public class App extends Application {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Abrir archivo");
         File file = fileChooser.showOpenDialog(stage);
-        System.out.println(file.getAbsolutePath());
+        //System.out.println(file.getAbsolutePath());
         try {
             Scanner reader = new Scanner(file); // Preparamos el lector de archivos
             JsonParser parser = new JsonParser();
@@ -196,7 +208,11 @@ public class App extends Application {
     }
 
     private void drawVoronoi() {
-
+        Voronoi voronoi = new Voronoi(SCREEN_HEIGHT-10, SCREEN_WIDTH -20, colonies,   centrals);
+        Canvas canvas =  voronoi.getVoronoi();
+        canvas.setTranslateY(100);
+        canvas.setTranslateX(10);
+        mainGroup.getChildren().add(canvas);
     }
 
     public static void main(String[] args) {

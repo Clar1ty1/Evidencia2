@@ -56,7 +56,7 @@ public class Voronoi {
         }
     }
 
-    public Group getVoronoi(Stage stage) {
+    public Canvas getVoronoi() {
         Canvas canvas = new Canvas(image.getWidth(), image.getHeight());
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.drawImage(image, 0, 0);
@@ -69,12 +69,15 @@ public class Voronoi {
             gc.fillOval(central.getX(), central.getY(), 8, 8);
         }
 
+        /*
         Group voronoiGroup = new Group(canvas);
 
         stage.setScene(new Scene(voronoiGroup));
         stage.show();
+        */
 
-        return voronoiGroup;
+
+        return canvas;
     }
 
 

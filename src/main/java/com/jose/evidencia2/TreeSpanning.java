@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+
+/*
 public class TreeSpanning {
     boolean solutionPrinted = false;
     public List<Colony> solution = new ArrayList<>();
@@ -75,3 +77,7 @@ public class TreeSpanning {
         System.out.println("Distancia total: " + distancia);
     }
 }
+
+
+
+ */
