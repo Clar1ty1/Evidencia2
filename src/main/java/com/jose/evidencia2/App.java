@@ -12,6 +12,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.*;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
@@ -39,7 +41,8 @@ public class App extends Application {
     double CANVAS_WIDTH = SCREEN_WIDTH / 4;
     double canvasSpacing = (SCREEN_WIDTH - CANVAS_WIDTH * 4) / 5;
     double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 4) / 5;
-
+    double[][] adjacencyMatrix;
+    double[][] capacityMatrix;
 
 
     @Override
@@ -106,8 +109,7 @@ public class App extends Application {
     }
     /**
      * Loads a graph from a file.
-     * Has complexity O(n).
-     * @param  None    No parameters are required.
+     * Has complexity O(n)..
      * @return None    No return value.
      */
     private void loadGraph() {
@@ -115,6 +117,7 @@ public class App extends Application {
         fileChooser.setTitle("Abrir archivo");
         File file = fileChooser.showOpenDialog(stage);
         System.out.println(file.getAbsolutePath());
+        float divider = 1.25f;
         try {
             Scanner reader = new Scanner(file); // Preparamos el lector de archivos
             JsonParser parser = new JsonParser();
@@ -132,8 +135,8 @@ public class App extends Application {
 
             for( JsonElement colony : colonies.getAsJsonArray()) {
                 String name = colony.getAsJsonObject().get("nombre").getAsString();
-                int x = colony.getAsJsonObject().get("coordenadaX").getAsInt();
-                int y = colony.getAsJsonObject().get("coordenadaY").getAsInt();
+                int x = (int) (colony.getAsJsonObject().get("coordenadaX").getAsInt()/divider);
+                int y = (int) (colony.getAsJsonObject().get("coordenadaY").getAsInt()/divider);
                 this.colonies.add( new Colony(name, x, y));
 
             }
@@ -141,18 +144,24 @@ public class App extends Application {
             for( JsonElement link : links.getAsJsonArray()) {
                 String colonyBegin = link.getAsJsonObject().get("coloniaInicial").getAsString();
                 String colonyEnd = link.getAsJsonObject().get("coloniaFinal").getAsString();
-                double distance = link.getAsJsonObject().get("distancia").getAsDouble();
-                double capacity = link.getAsJsonObject().get("capacidad").getAsDouble();
+                int distance = (int) (link.getAsJsonObject().get("distancia").getAsInt()/divider);
+                int capacity = (int) (link.getAsJsonObject().get("capacidad").getAsInt()/divider);
                 this.links.add( new Link(colonyBegin,colonyEnd,distance,capacity) );
+
             }
 
             for( JsonElement central : centrals.getAsJsonArray()) {
 
-                int x = central.getAsJsonObject().get("x").getAsInt();
-                int y = central.getAsJsonObject().get("y").getAsInt();
+                int x = (int) (central.getAsJsonObject().get("x").getAsInt()/divider);
+                int y = (int) (central.getAsJsonObject().get("y").getAsInt()/divider);
                 this.centrals.add( new Central( x, y ));
             }
-            drawGraph();
+            this.adjacencyMatrix = new double[this.colonies.size()][this.colonies.size()];
+            TreeSpanning tsp = new TreeSpanning();
+            tsp.solveTsp(this.colonies);
+            tsp.mostrarRuta(tsp.solution, tsp.calcularDistanciaTotal(tsp.solution));
+            //drawGraph();
+
         }
         catch (IOException ex) {
             System.out.println(ex);
@@ -160,25 +169,72 @@ public class App extends Application {
     }
 
     private void drawGraph() {
-        Canvas canvas = new Canvas(SCREEN_WIDTH-20, SCREEN_HEIGHT-10);
-        canvas.setTranslateY(100);
-        canvas.setTranslateX(10);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.setFill(Color.GRAY);
-        gc.setStroke(Color.BLACK);
-        gc.fillRect(0, 0, SCREEN_WIDTH-20, SCREEN_HEIGHT-11);
-        gc.strokeRect(0, 0, SCREEN_WIDTH-20, SCREEN_HEIGHT-11);
-        gc.setFill(Color.BLUE);
-        for (Colony colony : colonies ) {
-            gc.fillOval(colony.getX(), colony.getY(), 8, 8);
-        }
-        gc.setFill(Color.RED);
-        for( Central central: centrals ) {
-            gc.fillOval(central.getX(), central.getY(), 8, 8);
+        int radius = 6;
+        int translateX = 100;
+        int translateY = 150;
+
+        for (Colony colony : colonies) {
+            Circle circle = new Circle();
+            circle.setCenterX(colony.getX() + translateX);
+            circle.setCenterY(colony.getY() + translateY);
+            circle.setRadius(radius);
+            circle.setFill(Color.BLUE);
+            Text text = new Text();
+
+            text.setX(colony.getX() + translateX);
+            text.setY(colony.getY() + translateY - 10);
+
+            text.setText(String.valueOf(colony.getName()));
+
+            mainGroup.getChildren().addAll(text, circle);
         }
 
-        mainGroup.getChildren().add(canvas);
+        for (Central central : centrals) {
+            Circle circle = new Circle();
+            circle.setCenterX(central.getX() + translateX);
+            circle.setCenterY(central.getY() + translateY);
+            circle.setRadius(radius);
+            circle.setFill(Color.RED);
+            mainGroup.getChildren().add(circle);
+        }
+        int i = 0;
+        int j = 0;
+        for (Link link : links) {
+            String begin = link.getColonyBegin();
+            String end = link.getColonyEnd();
+            int x, y, xf, yf;
+            for (Colony colony : colonies) {
+                if (begin.equals(colony.getName())) {
+                    x = colony.getX() + translateX;
+                    y = colony.getY() + translateY;
+                    this.adjacencyMatrix[i][j] = link.getDistance();
+                    this.capacityMatrix[i][j] = link.getCapacity();
+                }
+                if (end.equals(colony.getName())) {
+                    xf = colony.getX() + translateX;
+                    yf = colony.getY() + translateY;
+                    this.adjacencyMatrix[i][j] = link.getDistance();
+                    this.capacityMatrix[i][j] = link.getCapacity();
+                }
+                    j++;
 
+            }
+            i++;
+
+        }
+        printMatrix(this.adjacencyMatrix);
+        printMatrix(this.capacityMatrix);
+
+
+    }
+
+    private void printMatrix(double[][] matrix) {
+        for( double[] row : matrix) {
+            for( double element : row) {
+                System.out.print(element + " ");
+            }
+            System.out.println();
+        }
     }
 
     public static void main(String[] args) {
