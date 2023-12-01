@@ -40,7 +40,7 @@ public class App extends Application {
     double BUTTON_WIDTH = 120;
     double CANVAS_WIDTH = SCREEN_WIDTH / 4;
     double canvasSpacing = (SCREEN_WIDTH - CANVAS_WIDTH * 4) / 5;
-    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 4) / 5;
+    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 5) / 6;
     double[][] adjacencyMatrix;
     double[][] capacityMatrix;
 
@@ -59,10 +59,6 @@ public class App extends Application {
         loadGraphButton.setMaxWidth(BUTTON_WIDTH);
         loadGraphButton.setMinWidth(BUTTON_WIDTH);
 
-        Button loadVoronoiDiagram = new Button("Diagrama Voronoi");
-        loadVoronoiDiagram.setMaxWidth(BUTTON_WIDTH);
-        loadVoronoiDiagram.setMinWidth(BUTTON_WIDTH);
-
         Button addColony = new Button("Añadir colonia");        
         addColony.setMaxWidth(BUTTON_WIDTH);
         addColony.setMinWidth(BUTTON_WIDTH);
@@ -74,6 +70,16 @@ public class App extends Application {
         Button saveGraph = new Button("Guardar grafo");
         saveGraph.setMaxWidth(BUTTON_WIDTH);
         saveGraph.setMinWidth(BUTTON_WIDTH);
+
+        Button loadVoronoiDiagram = new Button("Diagrama Voronoi");
+        loadVoronoiDiagram.setMaxWidth(BUTTON_WIDTH);
+        loadVoronoiDiagram.setMinWidth(BUTTON_WIDTH);
+
+        Button maxFlow = new Button("Flujo Máximo");
+        maxFlow.setMaxWidth(BUTTON_WIDTH);
+        maxFlow.setMinWidth(BUTTON_WIDTH);
+
+
 
         double pos = 0;
         pos = pos + spacing;
@@ -113,10 +119,22 @@ public class App extends Application {
                 drawVoronoi();
             }
         });
+
+        pos = 0;
+
+        pos = pos + spacing;
+        maxFlow.setTranslateX(pos);
+        maxFlow.setTranslateY(100);
+        maxFlow.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                getMaxFlow();
+            }
+        });
      
         mainGroup = new Group();
         
-        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram,  addColony, deleteColony, saveGraph, label1);
+        mainGroup.getChildren().addAll(loadGraphButton,maxFlow, loadVoronoiDiagram,  addColony, deleteColony, saveGraph, label1);
 
         Scene scene = new Scene(mainGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         
@@ -190,7 +208,7 @@ public class App extends Application {
     private void drawGraph() {
         int radius = 6;
         int translateX = 100;
-        int translateY = 150;
+        int translateY = 250;
 
         for (Colony colony : colonies) {
             Circle circle = new Circle();
@@ -250,7 +268,15 @@ public class App extends Application {
     private void drawVoronoi() {
         Voronoi voronoi = new Voronoi(SCREEN_HEIGHT-10, SCREEN_WIDTH -20, colonies,   centrals);
         Canvas canvas =  voronoi.getVoronoi();
-        canvas.setTranslateY(100);
+        canvas.setTranslateY(250);
+        canvas.setTranslateX(10);
+        mainGroup.getChildren().add(canvas);
+    }
+
+    private void getMaxFlow() {
+        MaxFlow maxFlow = new MaxFlow(SCREEN_HEIGHT-10, SCREEN_WIDTH -20, colonies, centrals,  links, capacityMatrix);
+        Canvas canvas = maxFlow.calculateMaxFlow();
+        canvas.setTranslateY(250);
         canvas.setTranslateX(10);
         mainGroup.getChildren().add(canvas);
     }
