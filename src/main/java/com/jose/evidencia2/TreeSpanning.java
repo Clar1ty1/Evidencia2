@@ -10,7 +10,6 @@ import java.util.Set;
 public class TreeSpanning {
     boolean solutionPrinted = false;
     public List< Colony > solution = new ArrayList<>();
-    public int totalDistance = 0;
     public void solveTsp(List<Colony> colonias) {
         Set<Colony> coloniasRestantes = new HashSet<>(colonias);
         List<Colony> rutaActual = new ArrayList<>();
@@ -35,7 +34,7 @@ public class TreeSpanning {
                 this.solutionPrinted = true;
                 distanciaParcial += actual.computeDistance(rutaActual.get(0));
                 rutaActual.add(rutaActual.get(0));  // Agrega la colonia de inicio al final de la ruta
-                mostrarRuta(rutaActual, (int)distanciaParcial);
+                mostrarRuta(rutaActual, distanciaParcial);
             }
 
             return;
@@ -66,15 +65,12 @@ public class TreeSpanning {
         return distanciaTotal;
     }
 
-    public void mostrarRuta(List<Colony> ruta, int distancia) {
+    public void mostrarRuta(List<Colony> ruta, double distancia) {
 
         for( Colony colony : ruta) {
             this.solution.add(colony);
-            this.totalDistance = distancia;
-            System.out.print(colony.getName() + " ");
         }
-        System.out.println();
-        System.out.println("Distancia total: " + distancia);
+
     }
 }
 

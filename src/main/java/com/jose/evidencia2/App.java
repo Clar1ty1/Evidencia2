@@ -10,11 +10,11 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.TextField;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.text.Font;
@@ -39,7 +39,7 @@ public class App extends Application {
     int SCREEN_WIDTH = 1200;
     double BUTTON_WIDTH = 120;
 
-    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 7) / 8;
+    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 8) / 9;
     int[][] adjacencyMatrix;
     int[][] capacityMatrix;
 
@@ -52,6 +52,8 @@ public class App extends Application {
     Button saveGraphButton = new Button("Guardar grafo");
     Button shortestPathButton = new Button("Ruta mas corta");
     Button addLinkButton = new Button("Añadir enlace");
+
+    Button maxFlowButton = new Button("Flujo maximo");
 
     TreeSpanning tsp = new TreeSpanning();
 
@@ -108,8 +110,7 @@ public class App extends Application {
             }
         });
 
-        shortestPathButton.setMaxWidth(BUTTON_WIDTH);
-        shortestPathButton.setMinWidth(BUTTON_WIDTH);
+
 
         double pos = 0;
         pos = pos + spacing;
@@ -148,8 +149,6 @@ public class App extends Application {
         deleteColonyButton.setTranslateX(pos);
         deleteColonyButton.setTranslateY(50);
 
-
-        
         pos = pos + BUTTON_WIDTH + spacing;
         saveGraphButton.setTranslateX(pos);
         saveGraphButton.setTranslateY(50);
@@ -160,15 +159,24 @@ public class App extends Application {
         shortestPathButton.setOnAction( new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                tsp.solveTsp(colonies);
                 drawShortestPath();
+            }
+        });
 
+
+        pos = pos + BUTTON_WIDTH + spacing;
+        maxFlowButton.setTranslateX(pos);
+        maxFlowButton.setTranslateY(50);
+        maxFlowButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                getMaxFlow();
             }
         });
      
         mainGroup = new Group();
         
-        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton);
+        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton, maxFlowButton);
 
         Scene scene = new Scene(mainGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         
@@ -202,14 +210,14 @@ public class App extends Application {
             JsonElement colonies = cities.getAsJsonObject().get("colonias");
             JsonElement links = cities.getAsJsonObject().get("enlaces");
             JsonElement centrals = cities.getAsJsonObject().get("centrales");
-            int i = 0;
+
             for( JsonElement colony : colonies.getAsJsonArray()) {
                 String name = colony.getAsJsonObject().get("nombre").getAsString();
                 int x = (int) (colony.getAsJsonObject().get("coordenadaX").getAsInt()/divider);
                 int y = (int) (colony.getAsJsonObject().get("coordenadaY").getAsInt()/divider);
 
                 this.colonies.add( new Colony(name, x, y));
-                i++;
+
             }
 
             for( JsonElement link : links.getAsJsonArray()) {
@@ -266,8 +274,8 @@ public class App extends Application {
             int index1 = map.get(begin);
             int index2 = map.get(end);
 
-            this.adjacencyMatrix[index1][index2] = link.getDistance();
-            this.capacityMatrix[index1][index2] = link.getCapacity();
+            this.adjacencyMatrix[index1][index2] = (int) link.getDistance();
+            this.capacityMatrix[index1][index2] = (int) link.getCapacity();
 
         }
         int[][] aux = this.adjacencyMatrix;
@@ -329,7 +337,7 @@ public class App extends Application {
         }
 
 
-        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton,  shortestPathButton);
+        newGroup.getChildren().addAll(loadGraphButton, loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton);
 
         Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(newScene);
@@ -338,23 +346,23 @@ public class App extends Application {
     }
 
     private void drawVoronoi() {
-        Voronoi voronoi = new Voronoi(SCREEN_HEIGHT-10, SCREEN_WIDTH -20, colonies,   centrals);
-        Canvas canvas =  voronoi.getVoronoi();
+        Voronoi voronoi = new Voronoi(SCREEN_HEIGHT - 10, SCREEN_WIDTH - 20, colonies, centrals);
+        Canvas canvas = voronoi.getVoronoi();
         canvas.setTranslateY(100);
         canvas.setTranslateX(10);
         Group newGroup = new Group();
-        newGroup.getChildren().addAll(canvas, loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton,  shortestPathButton);
-
+        newGroup.getChildren().addAll(canvas, loadGraphButton, loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton);
         Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(newScene);
+
     }
-    private void printMatrix(int[][] matrix) {
-        for( int[] row : matrix) {
-            for( int element : row) {
-                System.out.print(element + " ");
-            }
-            System.out.println();
-        }
+
+        private void getMaxFlow() {
+        MaxFlow maxFlow = new MaxFlow(SCREEN_HEIGHT-10, SCREEN_WIDTH -20, colonies, centrals,  links, capacityMatrix);
+        Canvas canvas = maxFlow.calculateMaxFlow();
+        canvas.setTranslateY(250);
+        canvas.setTranslateX(10);
+        mainGroup.getChildren().add(canvas);
     }
 
     private void drawShortestPath(){
@@ -539,7 +547,7 @@ public class App extends Application {
         city1.setTranslateY(30);
 
         Button deleteButton = new Button("Delete");
-        deleteButton.setTranslateY(50);
+        deleteButton.setTranslateY(80);
         deleteButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
