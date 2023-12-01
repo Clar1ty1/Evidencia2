@@ -159,6 +159,7 @@ public class App extends Application {
         shortestPathButton.setOnAction( new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                tsp.solveTsp(colonies);
                 drawShortestPath();
             }
         });
