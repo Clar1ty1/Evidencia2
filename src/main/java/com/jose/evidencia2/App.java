@@ -3,11 +3,16 @@ package com.jose.evidencia2;
 
 import java.util.*;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
@@ -18,11 +23,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 
 /**
@@ -35,8 +35,8 @@ public class App extends Application {
     Map<String, Integer> map = new HashMap<String, Integer>();
     Group mainGroup;
     Stage stage;
-    double SCREEN_HEIGHT = 800;
-    double SCREEN_WIDTH = 1200;
+    int SCREEN_HEIGHT = 800;
+    int SCREEN_WIDTH = 1200;
     double BUTTON_WIDTH = 120;
     double CANVAS_WIDTH = SCREEN_WIDTH / 4;
     double canvasSpacing = (SCREEN_WIDTH - CANVAS_WIDTH * 4) / 5;
@@ -58,7 +58,11 @@ public class App extends Application {
         Button loadGraphButton = new Button("Cargar grafo");
         loadGraphButton.setMaxWidth(BUTTON_WIDTH);
         loadGraphButton.setMinWidth(BUTTON_WIDTH);
-        
+
+        Button loadVoronoiDiagram = new Button("Diagrama Voronoi");
+        loadVoronoiDiagram.setMaxWidth(BUTTON_WIDTH);
+        loadVoronoiDiagram.setMinWidth(BUTTON_WIDTH);
+
         Button addColony = new Button("Añadir colonia");        
         addColony.setMaxWidth(BUTTON_WIDTH);
         addColony.setMinWidth(BUTTON_WIDTH);
@@ -80,6 +84,18 @@ public class App extends Application {
             @Override
             public void handle(ActionEvent event) {
                 loadGraph();
+
+
+            }
+        });
+
+        pos = pos + BUTTON_WIDTH + spacing;
+        loadVoronoiDiagram.setTranslateX(pos);
+        loadVoronoiDiagram.setTranslateY(50);
+        loadVoronoiDiagram.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                drawVoronoi();
             }
         });
         
@@ -99,7 +115,7 @@ public class App extends Application {
      
         mainGroup = new Group();
         
-        mainGroup.getChildren().addAll(loadGraphButton, addColony, deleteColony, saveGraph, label1);
+        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram,  addColony, deleteColony, saveGraph, label1);
 
         Scene scene = new Scene(mainGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         
@@ -109,7 +125,8 @@ public class App extends Application {
     }
     /**
      * Loads a graph from a file.
-     * Has complexity O(n)..
+     * Has complexity O(n).
+     * @param None  No parameters are required.
      * @return None    No return value.
      */
     private void loadGraph() {
@@ -229,6 +246,13 @@ public class App extends Application {
 
     }
 
+    private void drawVoronoi() {
+        Voronoi voronoi = new Voronoi(SCREEN_HEIGHT-10, SCREEN_WIDTH -20, colonies,   centrals);
+        Canvas canvas =  voronoi.getVoronoi();
+        canvas.setTranslateY(100);
+        canvas.setTranslateX(10);
+        mainGroup.getChildren().add(canvas);
+    }
     private void printMatrix(double[][] matrix) {
         for( double[] row : matrix) {
             for( double element : row) {
