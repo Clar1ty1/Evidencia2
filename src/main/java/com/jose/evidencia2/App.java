@@ -14,8 +14,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.text.Text;
@@ -38,11 +36,20 @@ public class App extends Application {
     int SCREEN_HEIGHT = 800;
     int SCREEN_WIDTH = 1200;
     double BUTTON_WIDTH = 120;
-    double CANVAS_WIDTH = SCREEN_WIDTH / 4;
-    double canvasSpacing = (SCREEN_WIDTH - CANVAS_WIDTH * 4) / 5;
-    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 4) / 5;
+
+    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 6) / 7;
     int[][] adjacencyMatrix;
     int[][] capacityMatrix;
+
+    Button loadGraphButton = new Button("Cargar grafo");
+    Button loadVoronoiDiagram = new Button("Diagrama Voronoi");
+    Button addColonyButton = new Button("Añadir colonia");
+    Button deleteColonyButton = new Button("Eliminar colonia");
+    Button saveGraphButton = new Button("Guardar grafo");
+    Button shortestPathButton = new Button("Ruta mas corta");
+
+    TreeSpanning tsp = new TreeSpanning();
+
 
 
     @Override
@@ -53,27 +60,24 @@ public class App extends Application {
         
         Label label1 = new Label("Seleccione una opción para comenzar");
         label1.setTranslateX(SCREEN_WIDTH/2 - 100);
-        
-                
-        Button loadGraphButton = new Button("Cargar grafo");
+
         loadGraphButton.setMaxWidth(BUTTON_WIDTH);
         loadGraphButton.setMinWidth(BUTTON_WIDTH);
 
-        Button loadVoronoiDiagram = new Button("Diagrama Voronoi");
         loadVoronoiDiagram.setMaxWidth(BUTTON_WIDTH);
         loadVoronoiDiagram.setMinWidth(BUTTON_WIDTH);
 
-        Button addColony = new Button("Añadir colonia");        
-        addColony.setMaxWidth(BUTTON_WIDTH);
-        addColony.setMinWidth(BUTTON_WIDTH);
-        
-        Button deleteColony = new Button("Eliminar colonia");
-        deleteColony.setMaxWidth(BUTTON_WIDTH);
-        deleteColony.setMinWidth(BUTTON_WIDTH);
-        
-        Button saveGraph = new Button("Guardar grafo");
-        saveGraph.setMaxWidth(BUTTON_WIDTH);
-        saveGraph.setMinWidth(BUTTON_WIDTH);
+        addColonyButton.setMaxWidth(BUTTON_WIDTH);
+        addColonyButton.setMinWidth(BUTTON_WIDTH);
+
+        deleteColonyButton.setMaxWidth(BUTTON_WIDTH);
+        deleteColonyButton.setMinWidth(BUTTON_WIDTH);
+
+        saveGraphButton.setMaxWidth(BUTTON_WIDTH);
+        saveGraphButton.setMinWidth(BUTTON_WIDTH);
+
+        shortestPathButton.setMaxWidth(BUTTON_WIDTH);
+        shortestPathButton.setMinWidth(BUTTON_WIDTH);
 
         double pos = 0;
         pos = pos + spacing;
@@ -100,22 +104,34 @@ public class App extends Application {
         });
         
         pos = pos + BUTTON_WIDTH + spacing;
-        addColony.setTranslateX(pos);
-        addColony.setTranslateY(50);
+        addColonyButton.setTranslateX(pos);
+        addColonyButton.setTranslateY(50);
         
         
         pos = pos + BUTTON_WIDTH + spacing;
-        deleteColony.setTranslateX(pos);
-        deleteColony.setTranslateY(50);
+        deleteColonyButton.setTranslateX(pos);
+        deleteColonyButton.setTranslateY(50);
         
         
         pos = pos + BUTTON_WIDTH + spacing;
-        saveGraph.setTranslateX(pos);
-        saveGraph.setTranslateY(50);
+        saveGraphButton.setTranslateX(pos);
+        saveGraphButton.setTranslateY(50);
+
+        pos = pos + BUTTON_WIDTH + spacing;
+        shortestPathButton.setTranslateX(pos);
+        shortestPathButton.setTranslateY(50);
+        shortestPathButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                tsp.solveTsp(colonies);
+                drawShortestPath();
+
+            }
+        });
      
         mainGroup = new Group();
         
-        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram,  addColony, deleteColony, saveGraph, label1);
+        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton);
 
         Scene scene = new Scene(mainGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         
@@ -133,7 +149,7 @@ public class App extends Application {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Abrir archivo");
         File file = fileChooser.showOpenDialog(stage);
-        System.out.println(file.getAbsolutePath());
+
         float divider = 1.25f;
         try {
             Scanner reader = new Scanner(file); // Preparamos el lector de archivos
@@ -176,8 +192,7 @@ public class App extends Application {
             }
             this.adjacencyMatrix = new int[this.colonies.size()+1][this.colonies.size()+1];
             this.capacityMatrix = new int[this.colonies.size()+1][this.colonies.size()+1];
-            TreeSpanning tsp = new TreeSpanning();
-            tsp.solveTsp(this.colonies);
+
 
             drawGraph();
 
@@ -188,25 +203,10 @@ public class App extends Application {
     }
 
     private void drawGraph() {
-        int radius = 6;
+        int radius = 10;
         int translateX = 100;
         int translateY = 150;
-
-        for (Colony colony : colonies) {
-            Circle circle = new Circle();
-            circle.setCenterX(colony.getX() + translateX);
-            circle.setCenterY(colony.getY() + translateY);
-            circle.setRadius(radius);
-            circle.setFill(Color.BLUE);
-            Text text = new Text();
-
-            text.setX(colony.getX() + translateX);
-            text.setY(colony.getY() + translateY - 10);
-
-            text.setText(String.valueOf(colony.getName()));
-
-            mainGroup.getChildren().addAll(text, circle);
-        }
+        Group newGroup = new Group();
 
         for (Central central : centrals) {
             Circle circle = new Circle();
@@ -214,10 +214,9 @@ public class App extends Application {
             circle.setCenterY(central.getY() + translateY);
             circle.setRadius(radius);
             circle.setFill(Color.RED);
-            mainGroup.getChildren().add(circle);
+            newGroup.getChildren().add(circle);
         }
-        int i = 0;
-        int j = 0;
+
         for (Link link : links) {
             String begin = link.getColonyBegin();
             String end = link.getColonyEnd();
@@ -229,9 +228,68 @@ public class App extends Application {
             this.capacityMatrix[index1][index2] = link.getCapacity();
 
         }
-        printMatrix(this.adjacencyMatrix);
-        System.out.println();
-        printMatrix(this.capacityMatrix);
+        int[][] aux = this.adjacencyMatrix;
+        for( int i = 0; i < this.adjacencyMatrix.length; i++) {
+            for( int j = 0; j < this.adjacencyMatrix.length; j++) {
+                if( this.adjacencyMatrix[i][j] != 0) {
+                    if( this.adjacencyMatrix[i][j] == this.adjacencyMatrix[j][i] && aux[i][j] != -1 && aux[j][i] != -1) {
+                        Line line = new Line();
+                        line.setStartX(colonies.get(i).getX() + translateX - 6 );
+                        line.setStartY(colonies.get(i).getY() + translateY - 6 );
+                        line.setEndX(colonies.get(j).getX() + translateX - 6);
+                        line.setEndY(colonies.get(j).getY() + translateY - 6);
+                        line.setStroke(Color.BLUE);
+                        line.setStrokeWidth(3);
+
+                        Line line2 = new Line();
+                        line2.setStartX(colonies.get(i).getX() + translateX + 6 );
+                        line2.setStartY(colonies.get(i).getY() + translateY + 6);
+                        line2.setEndX(colonies.get(j).getX() + translateX + 6);
+                        line2.setEndY(colonies.get(j).getY() + translateY + 6);
+                        line2.setStroke(Color.RED);
+                        line2.setStrokeWidth(3);
+                        aux[i][j] = -1;
+                        aux[j][i] = -1;
+                        newGroup.getChildren().addAll(line, line2);
+                    }
+                    else if(aux[i][j] != -1){
+                        Line line = new Line();
+                        line.setStartX(colonies.get(i).getX() + translateX  );
+                        line.setStartY(colonies.get(i).getY() + translateY  );
+                        line.setEndX(colonies.get(j).getX() + translateX );
+                        line.setEndY(colonies.get(j).getY() + translateY );
+                        line.setStroke(Color.GREEN);
+                        line.setStrokeWidth(3);
+                        newGroup.getChildren().add(line);
+
+                    }
+
+                }
+            }
+        }
+
+
+        for (Colony colony : colonies) {
+            Circle circle = new Circle();
+            circle.setCenterX(colony.getX() + translateX);
+            circle.setCenterY(colony.getY() + translateY);
+            circle.setRadius(radius);
+            circle.setFill(Color.BLUE);
+            Text text = new Text();
+
+            text.setX(colony.getX() + translateX - 30);
+            text.setY(colony.getY() + translateY - 10);
+
+            text.setText(String.valueOf(colony.getName()));
+
+            newGroup.getChildren().addAll(text, circle);
+        }
+
+
+        newGroup.getChildren().addAll(loadGraphButton, loadVoronoiDiagram, addColonyButton, deleteColonyButton, saveGraphButton, shortestPathButton);
+
+        Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
+        stage.setScene(newScene);
 
 
     }
@@ -241,7 +299,11 @@ public class App extends Application {
         Canvas canvas =  voronoi.getVoronoi();
         canvas.setTranslateY(100);
         canvas.setTranslateX(10);
-        mainGroup.getChildren().add(canvas);
+        Group newGroup = new Group();
+        newGroup.getChildren().addAll(canvas, loadGraphButton, loadVoronoiDiagram, addColonyButton, deleteColonyButton, saveGraphButton, shortestPathButton);
+
+        Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
+        stage.setScene(newScene);
     }
     private void printMatrix(int[][] matrix) {
         for( int[] row : matrix) {
@@ -250,6 +312,72 @@ public class App extends Application {
             }
             System.out.println();
         }
+    }
+
+    private void drawShortestPath(){
+        int radius = 8;
+        int translateX = 100;
+        int translateY = 150;
+        Group newGroup = new Group();
+
+
+        int[] x = new int[tsp.solution.size()];
+        int[] y = new int[tsp.solution.size()];
+
+        for( Colony colony : tsp.solution ){
+            x[tsp.solution.indexOf(colony)] = colony.getX() ;
+            y[tsp.solution.indexOf(colony)] = colony.getY() ;
+
+        }
+        for( int i = 0; i < x.length - 1 ; i++ ){
+            Line line = new Line();
+            line.setStartX(x[i] + translateX);
+
+            line.setStartY(y[i] + translateY);
+
+            line.setEndX(x[i+1] + translateX);
+
+            line.setEndY(y[i+1] + translateY);
+
+            Text text = new Text();
+
+            text.setX(x[i] + translateX + 30);
+            text.setY(y[i] + translateY + 10);
+
+            text.setText(String.valueOf(i));
+
+            line.setStroke(Color.PURPLE);
+            line.setStrokeWidth(3);
+            newGroup.getChildren().addAll(text, line);
+        }
+        Line line = new Line();
+        line.setStartX(x[0] + translateX);
+        line.setStartY(y[0] + translateY);
+        line.setEndX(x[x.length - 1] + translateX);
+        line.setEndY(y[y.length - 1] + translateY);
+
+
+        line.setStroke(Color.PURPLE);
+        line.setStrokeWidth(3);
+        //newGroup.getChildren().add( line);
+        for( Colony colony : tsp.solution ){
+            Circle circle = new Circle();
+            circle.setCenterX(colony.getX() + translateX);
+            circle.setCenterY(colony.getY() + translateY);
+            circle.setRadius(radius);
+            circle.setFill(Color.BLUE);
+            Text text = new Text();
+
+            text.setX(colony.getX() + translateX - 30);
+            text.setY(colony.getY() + translateY - 30);
+
+            text.setText(String.valueOf(colony.getName()));
+
+            newGroup.getChildren().addAll(text, circle);
+        }
+        newGroup.getChildren().addAll(loadGraphButton, loadVoronoiDiagram, addColonyButton, deleteColonyButton, saveGraphButton, shortestPathButton);
+        Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
+        stage.setScene(newScene);
     }
 
     public static void main(String[] args) {
