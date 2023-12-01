@@ -1,0 +1,118 @@
+{
+    "ciudad": {
+        "colonias": [
+            {
+                "nombre": "C1",
+                "coordenadaX": 80,
+                "coordenadaY": 20
+            },
+            {
+                "nombre": "C2",
+                "coordenadaX": 64,
+                "coordenadaY": 200
+            },
+            {
+                "nombre": "C3",
+                "coordenadaX": 11,
+                "coordenadaY": 100
+            },
+            {
+                "nombre": "C4",
+                "coordenadaX": 5,
+                "coordenadaY": 20
+            }
+        ],
+        "enlaces": [
+            {
+                "coloniaInicial": "C1",
+                "coloniaFinal": "C2",
+                "distancia": 12.0,
+                "capacidad": 38.0
+            },
+            {
+                "coloniaInicial": "C1",
+                "coloniaFinal": "C3",
+                "distancia": 36.0,
+                "capacidad": 9.0
+            },
+            {
+                "coloniaInicial": "C1",
+                "coloniaFinal": "C4",
+                "distancia": 25.0,
+                "capacidad": 14.0
+            },
+            {
+                "coloniaInicial": "C2",
+                "coloniaFinal": "C1",
+                "distancia": 12.0,
+                "capacidad": 41.0
+            },
+            {
+                "coloniaInicial": "C2",
+                "coloniaFinal": "C3",
+                "distancia": 14.0,
+                "capacidad": 33.0
+            },
+            {
+                "coloniaInicial": "C2",
+                "coloniaFinal": "C4",
+                "distancia": 16.0,
+                "capacidad": 25.0
+            },
+            {
+                "coloniaInicial": "C3",
+                "coloniaFinal": "C1",
+                "distancia": 36.0,
+                "capacidad": 14.0
+            },
+            {
+                "coloniaInicial": "C3",
+                "coloniaFinal": "C2",
+                "distancia": 14.0,
+                "capacidad": 36.0
+            },
+            {
+                "coloniaInicial": "C3",
+                "coloniaFinal": "C4",
+                "distancia": 5.0,
+                "capacidad": 44.0
+            },
+            {
+                "coloniaInicial": "C4",
+                "coloniaFinal": "C1",
+                "distancia": 36.0,
+                "capacidad": 14.0
+            },
+            {
+                "coloniaInicial": "C4",
+                "coloniaFinal": "C2",
+                "distancia": 14.0,
+                "capacidad": 36.0
+            },
+            {
+                "coloniaInicial": "C4",
+                "coloniaFinal": "C3",
+                "distancia": 5.0,
+                "capacidad": 44.0
+            }
+        ],
+        "centrales": [
+            {
+                "x": "160",
+                "y": "400"
+            },
+            {
+                "x": "240",
+                "y": "80"
+            },
+            {
+                "x": "360",
+                "y": "120"
+            },
+            {
+                "x": "360",
+                "y": "120"
+            }
+        ]
+    }
+}

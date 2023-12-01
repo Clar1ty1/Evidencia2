@@ -38,7 +38,7 @@ public class App extends Application {
     int SCREEN_HEIGHT = 800;
     int SCREEN_WIDTH = 1200;
     double BUTTON_WIDTH = 120;
-
+    float divider = 1.25f;
     double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 8) / 9;
     int[][] adjacencyMatrix;
     int[][] capacityMatrix;
@@ -195,8 +195,11 @@ public class App extends Application {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Abrir archivo");
         File file = fileChooser.showOpenDialog(stage);
+        colonies = new ArrayList<>();
+        links = new ArrayList<>();
+        centrals = new ArrayList<>();
         this.filePath = file.getAbsolutePath();
-        float divider = 1.25f;
+
         try {
             Scanner reader = new Scanner(file); // Preparamos el lector de archivos
             JsonParser parser = new JsonParser();
@@ -585,12 +588,30 @@ public class App extends Application {
 
     private void saveGraph(){
         try{
-            //FileWriter writer = new FileWriter(this.filePath);
+            FileWriter writer = new FileWriter(this.filePath);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            for( Link link : links ){
-                System.out.println(gson.toJsonTree(link));
-            }
+            char quote = '"';
+            String json = "{" + quote + "ciudad" + quote + ": { "  + quote + "colonias" + quote + ": [";
 
+            for( Colony colony : colonies ){
+                json += "{" + quote + "nombre" + quote + ": " + quote + colony.getName() + quote + "," + quote + "coordenadaX" + quote + ": " + (int)colony.getX()*divider + "," + quote + "coordenadaY" + quote + ": " + (int)colony.getY()*divider + "},";
+            }
+            json = json.substring(0, json.length() - 1);
+            json += "]," + quote + "enlaces" + quote + ": [";
+
+            for( Link link : links ){
+                json += "{" + quote + "coloniaInicial" + quote + ":" + quote + link.getColonyBegin() + quote + "," + quote + "coloniaFinal" + quote + ":" + quote + link.getColonyEnd() + quote + "," + quote + "distancia" + quote + ":" + (int)link.getDistance()*divider + "," + quote + "capacidad" + quote + ":" + (int)link.getCapacity()*divider + "},";
+            }
+            json = json.substring(0, json.length() - 1);
+            json += "]," + quote + "centrales" + quote + ": [";
+
+            for( Central central : centrals ){
+                json += "{" + quote + "x" + quote + ":" + quote + (int)central.getX()*divider + quote + "," + quote + "y" + quote + ":" + quote + (int)central.getY()*divider + quote + "},";
+            }
+            json = json.substring(0, json.length() - 1);
+            json += "]}}";
+            writer.write(json);
+            writer.close();
         }
         catch(Exception e){
 
