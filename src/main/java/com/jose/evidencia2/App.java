@@ -1,11 +1,10 @@
 package com.jose.evidencia2;
 
 
+import java.io.FileWriter;
 import java.util.*;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -43,6 +42,8 @@ public class App extends Application {
     double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 7) / 8;
     int[][] adjacencyMatrix;
     int[][] capacityMatrix;
+
+    String filePath = "";
 
     Button loadGraphButton = new Button("Cargar grafo");
     Button loadVoronoiDiagram = new Button("Diagrama Voronoi");
@@ -100,6 +101,12 @@ public class App extends Application {
 
         saveGraphButton.setMaxWidth(BUTTON_WIDTH);
         saveGraphButton.setMinWidth(BUTTON_WIDTH);
+        saveGraphButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                saveGraph();
+            }
+        });
 
         shortestPathButton.setMaxWidth(BUTTON_WIDTH);
         shortestPathButton.setMinWidth(BUTTON_WIDTH);
@@ -179,7 +186,7 @@ public class App extends Application {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Abrir archivo");
         File file = fileChooser.showOpenDialog(stage);
-
+        this.filePath = file.getAbsolutePath();
         float divider = 1.25f;
         try {
             Scanner reader = new Scanner(file); // Preparamos el lector de archivos
@@ -531,9 +538,9 @@ public class App extends Application {
         city1.setPromptText("Colonia");
         city1.setTranslateY(30);
 
-        Button addButton = new Button("Delete");
-        addButton.setTranslateY(50);
-        addButton.setOnAction(new EventHandler<ActionEvent>() {
+        Button deleteButton = new Button("Delete");
+        deleteButton.setTranslateY(50);
+        deleteButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
 
@@ -546,14 +553,39 @@ public class App extends Application {
                     return;
                 }
 
-                links.add(new Link(city1.getText(), city2.getText(), Integer.parseInt(distance.getText()), Integer.parseInt(capacity.getText())));
+                int index = map.get(city1.getText());
+                colonies.remove(index);
+                List<Link> linksToRemove = new ArrayList<>();
+                for( Link link : links ){
+                    if( link.getColonyBegin().equals(city1.getText()) || link.getColonyEnd().equals(city1.getText()) ){
+                        linksToRemove.add(link);
+                    }
+                }
+                for( Link link : linksToRemove ){
+                    links.remove(link);
+                }
+
                 newStage.close();
                 drawGraph();
             }
         });
-        newGroup.getChildren().addAll(city1, city2, distance, capacity, addButton, city1Label, city2Label, distanceLabel, capacityLabel);
+        newGroup.getChildren().addAll(city1, deleteButton, city1Label);
         newStage.setScene(newScene);
         newStage.show();
+    }
+
+    private void saveGraph(){
+        try{
+            //FileWriter writer = new FileWriter(this.filePath);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            for( Link link : links ){
+                System.out.println(gson.toJsonTree(link));
+            }
+
+        }
+        catch(Exception e){
+
+        }
     }
 
     public static void main(String[] args) {
