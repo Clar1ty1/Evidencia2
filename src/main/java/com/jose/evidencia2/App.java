@@ -41,8 +41,8 @@ public class App extends Application {
     double CANVAS_WIDTH = SCREEN_WIDTH / 4;
     double canvasSpacing = (SCREEN_WIDTH - CANVAS_WIDTH * 4) / 5;
     double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 4) / 5;
-    double[][] adjacencyMatrix;
-    double[][] capacityMatrix;
+    int[][] adjacencyMatrix;
+    int[][] capacityMatrix;
 
 
     @Override
@@ -156,7 +156,7 @@ public class App extends Application {
                 int y = (int) (colony.getAsJsonObject().get("coordenadaY").getAsInt()/divider);
                 map.put(name, i);
                 this.colonies.add( new Colony(name, x, y));
-
+                i++;
             }
 
             for( JsonElement link : links.getAsJsonArray()) {
@@ -174,7 +174,8 @@ public class App extends Application {
                 int y = (int) (central.getAsJsonObject().get("y").getAsInt()/divider);
                 this.centrals.add( new Central( x, y ));
             }
-            this.adjacencyMatrix = new double[this.colonies.size()][this.colonies.size()];
+            this.adjacencyMatrix = new int[this.colonies.size()+1][this.colonies.size()+1];
+            this.capacityMatrix = new int[this.colonies.size()+1][this.colonies.size()+1];
             TreeSpanning tsp = new TreeSpanning();
             tsp.solveTsp(this.colonies);
 
@@ -221,26 +222,15 @@ public class App extends Application {
             String begin = link.getColonyBegin();
             String end = link.getColonyEnd();
             int x, y, xf, yf;
-            for (Colony colony : colonies) {
-                if (begin.equals(colony.getName())) {
-                    x = colony.getX() + translateX;
-                    y = colony.getY() + translateY;
-                    this.adjacencyMatrix[i][j] = link.getDistance();
-                    this.capacityMatrix[i][j] = link.getCapacity();
-                }
-                if (end.equals(colony.getName())) {
-                    xf = colony.getX() + translateX;
-                    yf = colony.getY() + translateY;
-                    this.adjacencyMatrix[i][j] = link.getDistance();
-                    this.capacityMatrix[i][j] = link.getCapacity();
-                }
-                    j++;
+            int index1 = map.get(begin);
+            int index2 = map.get(end);
 
-            }
-            i++;
+            this.adjacencyMatrix[index1][index2] = link.getDistance();
+            this.capacityMatrix[index1][index2] = link.getCapacity();
 
         }
         printMatrix(this.adjacencyMatrix);
+        System.out.println();
         printMatrix(this.capacityMatrix);
 
 
@@ -253,9 +243,9 @@ public class App extends Application {
         canvas.setTranslateX(10);
         mainGroup.getChildren().add(canvas);
     }
-    private void printMatrix(double[][] matrix) {
-        for( double[] row : matrix) {
-            for( double element : row) {
+    private void printMatrix(int[][] matrix) {
+        for( int[] row : matrix) {
+            for( int element : row) {
                 System.out.print(element + " ");
             }
             System.out.println();
