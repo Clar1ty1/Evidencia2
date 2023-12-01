@@ -39,7 +39,7 @@ public class App extends Application {
     int SCREEN_WIDTH = 1200;
     double BUTTON_WIDTH = 120;
     float divider = 1.25f;
-    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 8) / 9;
+    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 5) / 6;
     int[][] adjacencyMatrix;
     int[][] adjacencyMatrixDijkstra;
     int[][] capacityMatrix;
@@ -51,14 +51,21 @@ public class App extends Application {
     Button addColonyButton = new Button("Añadir colonia");
     Button deleteColonyButton = new Button("Eliminar colonia");
     Button saveGraphButton = new Button("Guardar grafo");
-    Button shortestPathButton = new Button("Ruta mas corta");
+    Button shortestPathButton = new Button("Ruta más corta");
     Button addLinkButton = new Button("Añadir enlace");
-    Button dijkstraButton = new Button("Fibra optica");
 
-    Button maxFlowButton = new Button("Flujo maximo");
+
+    Button deleteLinkButton = new Button("Eliminar enlace");
+
+    Button optimalNetworkButton = new Button("Cableado Óptimo");
+    Button maxFlowButton = new Button("Flujo Máximo");
+
+    Button seeGraphButton = new Button("Ver grafo");
 
     TreeSpanning tsp = new TreeSpanning();
     private int[] costs;
+    Label label1 = new Label("Seleccione una opción para comenzar");
+
 
 
     @Override
@@ -67,17 +74,11 @@ public class App extends Application {
         
         this.stage.setTitle("Evidencia 2");
         
-        Label label1 = new Label("Seleccione una opción para comenzar");
+        stage.setWidth(SCREEN_WIDTH);
+
         label1.setTranslateX(SCREEN_WIDTH/2 - 100);
 
-        dijkstraButton.setMaxWidth(BUTTON_WIDTH);
-        dijkstraButton.setMinWidth(BUTTON_WIDTH);
-        dijkstraButton.setOnAction( new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                startDijkstra();
-            }
-        });
+
 
         loadGraphButton.setMaxWidth(BUTTON_WIDTH);
         loadGraphButton.setMinWidth(BUTTON_WIDTH);
@@ -87,41 +88,30 @@ public class App extends Application {
 
         addColonyButton.setMaxWidth(BUTTON_WIDTH);
         addColonyButton.setMinWidth(BUTTON_WIDTH);
-        addColonyButton.setOnAction( new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                addColony();
-            }
-        });
 
         addLinkButton.setMaxWidth(BUTTON_WIDTH);
         addLinkButton.setMinWidth(BUTTON_WIDTH);
-        addLinkButton.setOnAction( new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                addLink();
-            }
-        });
+
+        maxFlowButton.setMaxWidth(BUTTON_WIDTH);
+        maxFlowButton.setMinWidth(BUTTON_WIDTH);
+
+        deleteLinkButton.setMaxWidth(BUTTON_WIDTH);
+        deleteLinkButton.setMinWidth(BUTTON_WIDTH);
 
         deleteColonyButton.setMaxWidth(BUTTON_WIDTH);
         deleteColonyButton.setMinWidth(BUTTON_WIDTH);
-        deleteColonyButton.setOnAction( new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                deleteColony();
-            }
-        });
 
         saveGraphButton.setMaxWidth(BUTTON_WIDTH);
         saveGraphButton.setMinWidth(BUTTON_WIDTH);
-        saveGraphButton.setOnAction( new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                saveGraph();
-            }
-        });
 
+        optimalNetworkButton.setMaxWidth(BUTTON_WIDTH);
+        optimalNetworkButton.setMinWidth(BUTTON_WIDTH);
 
+        shortestPathButton.setMaxWidth(BUTTON_WIDTH);
+        shortestPathButton.setMinWidth(BUTTON_WIDTH);
+
+        seeGraphButton.setMaxWidth(BUTTON_WIDTH);
+        seeGraphButton.setMinWidth(BUTTON_WIDTH);
 
         double pos = 0;
         pos = pos + spacing;
@@ -138,35 +128,70 @@ public class App extends Application {
         });
 
         pos = pos + BUTTON_WIDTH + spacing;
+        addColonyButton.setTranslateX(pos);
+        addColonyButton.setTranslateY(50);
+        addColonyButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                addColony();
+            }
+        });
+
+        pos = pos + BUTTON_WIDTH + spacing;
+        deleteColonyButton.setTranslateX(pos);
+        deleteColonyButton.setTranslateY(50);
+        deleteColonyButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                deleteColony();
+            }
+        });
+
+        pos = pos + BUTTON_WIDTH + spacing;
+        addLinkButton.setTranslateX(pos);
+        addLinkButton.setTranslateY(50);
+        addLinkButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                addLink();
+            }
+        });
+
+        pos = pos + BUTTON_WIDTH + spacing;
+        deleteLinkButton.setTranslateX(pos);
+        deleteLinkButton.setTranslateY(50);
+        deleteLinkButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                deleteLink();
+            }
+        });
+
+        pos = 0;
+        pos = pos + spacing;
         loadVoronoiDiagram.setTranslateX(pos);
-        loadVoronoiDiagram.setTranslateY(50);
+        loadVoronoiDiagram.setTranslateY(80);
         loadVoronoiDiagram.setOnAction( new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 drawVoronoi();
             }
         });
-        
-        pos = pos + BUTTON_WIDTH + spacing;
-        addColonyButton.setTranslateX(pos);
-        addColonyButton.setTranslateY(50);
-        
-        
-        pos = pos + BUTTON_WIDTH + spacing;
-        addLinkButton.setTranslateX(pos);
-        addLinkButton.setTranslateY(50);
-
-        pos = pos + BUTTON_WIDTH + spacing;
-        deleteColonyButton.setTranslateX(pos);
-        deleteColonyButton.setTranslateY(50);
 
         pos = pos + BUTTON_WIDTH + spacing;
         saveGraphButton.setTranslateX(pos);
-        saveGraphButton.setTranslateY(50);
+        saveGraphButton.setTranslateY(80);
+        saveGraphButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                saveGraph();
+            }
+        });
+
 
         pos = pos + BUTTON_WIDTH + spacing;
         shortestPathButton.setTranslateX(pos);
-        shortestPathButton.setTranslateY(50);
+        shortestPathButton.setTranslateY(80);
         shortestPathButton.setOnAction( new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -178,17 +203,38 @@ public class App extends Application {
 
         pos = pos + BUTTON_WIDTH + spacing;
         maxFlowButton.setTranslateX(pos);
-        maxFlowButton.setTranslateY(50);
+        maxFlowButton.setTranslateY(80);
         maxFlowButton.setOnAction( new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 getMaxFlow();
             }
         });
+
+        pos = pos + BUTTON_WIDTH + spacing;
+        optimalNetworkButton.setTranslateX(pos);
+        optimalNetworkButton.setTranslateY(80);
+        optimalNetworkButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                startDijkstra();
+            }
+        });
+
+        pos = 0;
+        pos = pos + spacing + (BUTTON_WIDTH + spacing) * 2;
+        seeGraphButton.setTranslateX(pos);
+        seeGraphButton.setTranslateY(110);
+        seeGraphButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                drawGraph();
+            }
+        });
      
         mainGroup = new Group();
         
-        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton, maxFlowButton, dijkstraButton);
+        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton, maxFlowButton, optimalNetworkButton, seeGraphButton);
 
         Scene scene = new Scene(mainGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         
@@ -199,7 +245,6 @@ public class App extends Application {
     /**
      * Loads a graph from a file.
      * Has complexity O(n).
-     * @param None  No parameters are required.
      * @return None    No return value.
      */
     private void loadGraph() {
@@ -263,7 +308,7 @@ public class App extends Application {
     private void drawGraph() {
 
         int radius = 10;
-        int translateX = 100;
+        int translateX = 200;
         int translateY = 150;
         this.adjacencyMatrix = new int[this.colonies.size()+1][this.colonies.size()+1];
         this.adjacencyMatrixDijkstra = new int[this.colonies.size()+1][this.colonies.size()+1];
@@ -358,7 +403,7 @@ public class App extends Application {
         }
 
 
-        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton, dijkstraButton);
+        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton, maxFlowButton, optimalNetworkButton, seeGraphButton);
 
         Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(newScene);
@@ -369,27 +414,33 @@ public class App extends Application {
     private void drawVoronoi() {
         Voronoi voronoi = new Voronoi(SCREEN_HEIGHT - 10, SCREEN_WIDTH - 20, colonies, centrals);
         Canvas canvas = voronoi.getVoronoi();
-        canvas.setTranslateY(100);
+        canvas.setTranslateY(150);
         canvas.setTranslateX(10);
         Group newGroup = new Group();
-        newGroup.getChildren().addAll(canvas, loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton, dijkstraButton);
+        newGroup.getChildren().addAll(canvas, loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton, maxFlowButton, optimalNetworkButton, seeGraphButton );
         Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(newScene);
 
     }
 
-        private void getMaxFlow() {
-        MaxFlow maxFlow = new MaxFlow(SCREEN_HEIGHT-10, SCREEN_WIDTH -20, colonies, centrals,  links, capacityMatrix);
-        Canvas canvas = maxFlow.calculateMaxFlow();
-        canvas.setTranslateY(250);
-        canvas.setTranslateX(10);
-        mainGroup.getChildren().add(canvas);
+    private void getMaxFlow() {
+
+        MaxFlow maxFlow = new MaxFlow(SCREEN_HEIGHT - 10, SCREEN_WIDTH - 20,colonies, capacityMatrix);
+        Canvas canvas = maxFlow.showMaxFlow();
+        canvas.setTranslateX(50);
+        canvas.setTranslateY(150);
+        Group newGroup = new Group();
+        newGroup.getChildren().addAll(canvas, loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton, maxFlowButton, optimalNetworkButton, seeGraphButton );
+        Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
+        stage.setScene(newScene);
+
+
     }
 
     private void drawShortestPath(){
         int radius = 8;
         int translateX = 100;
-        int translateY = 150;
+        int translateY = 220;
         Group newGroup = new Group();
 
 
@@ -454,7 +505,7 @@ public class App extends Application {
 
             newGroup.getChildren().addAll(text, circle);
         }
-        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton, dijkstraButton);
+        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton, maxFlowButton, optimalNetworkButton, seeGraphButton );
         Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(newScene);
     }
@@ -603,6 +654,66 @@ public class App extends Application {
         newStage.show();
     }
 
+    private void deleteLink(){
+        Stage newStage = new Stage();
+        Group newGroup = new Group();
+        newGroup.setTranslateX(10);
+        Scene newScene = new Scene(newGroup, 300, 300);
+
+        Label city1Label = new Label("Especifique el enlace a eliminar");
+        city1Label.setTranslateY(0);
+        TextField  startCity = new TextField();
+        startCity.setPromptText("Colonia Origen");
+        startCity.setTranslateY(30);
+
+        TextField endCity = new TextField();
+        endCity.setPromptText("Colonia Destino");
+        endCity.setTranslateY(60);
+
+        Button deleteButton = new Button("Delete");
+        deleteButton.setTranslateY(90);
+        deleteButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+
+                if( !map.containsKey(startCity.getText()) ) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText(startCity.getText() + " no existe");
+                    alert.showAndWait();
+                    return;
+                }
+                else if (!map.containsKey(endCity.getText())) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText(endCity.getText() + " no existe");
+                    alert.showAndWait();
+                    return;
+
+                }
+
+                List<Link> linksToRemove = new ArrayList<>();
+                for( Link link : links ){
+                    if( link.getColonyBegin().equals(startCity.getText()) && link.getColonyEnd().equals(endCity.getText()) ){
+                        linksToRemove.add(link);
+                    }
+                }
+                for( Link link : linksToRemove ){
+                    links.remove(link);
+                }
+
+                newStage.close();
+                drawGraph();
+            }
+        });
+        newGroup.getChildren().addAll(startCity, endCity, deleteButton, city1Label);
+        newStage.setScene(newScene);
+        newStage.show();
+
+
+    }
+
+
     private void saveGraph(){
         try{
             FileWriter writer = new FileWriter(this.filePath);
@@ -668,9 +779,7 @@ public class App extends Application {
         while( !unvisited.isEmpty() ){
             index = map.get(unvisited.peek().getName());
             //System.out.println("Index: " + index);
-            if( colonies.get(index).equals(end) ){
-                return previous;
-            }
+
             for( int i = 0; i < adjacencyMatrixDijkstra[index].length - 1 ; i++){
                 if( costs[i] > costs[index] + adjacencyMatrixDijkstra[index][i] && adjacencyMatrixDijkstra[index][i] > 0 && !visited.contains(colonies.get(index))){
                     costs[i] = costs[index] + adjacencyMatrixDijkstra[index][i];
@@ -702,7 +811,7 @@ public class App extends Application {
         city1.setTranslateY(30);
 
         Label city2Label = new Label("Nombre colonia 2");
-        city1Label.setTranslateY(60);
+        city2Label.setTranslateY(60);
         TextField city2 = new TextField();
         city2.setPromptText("Colonia");
         city2.setTranslateY(90);
@@ -793,7 +902,7 @@ public class App extends Application {
             newGroup.getChildren().addAll(text, circle);
         }
 
-        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton, dijkstraButton);
+        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton, maxFlowButton, optimalNetworkButton, seeGraphButton );
         stage.setScene(new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT));
     }
 
