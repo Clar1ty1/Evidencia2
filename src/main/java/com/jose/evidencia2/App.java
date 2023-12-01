@@ -41,6 +41,7 @@ public class App extends Application {
     float divider = 1.25f;
     double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 8) / 9;
     int[][] adjacencyMatrix;
+    int[][] adjacencyMatrixDijkstra;
     int[][] capacityMatrix;
 
     String filePath = "";
@@ -52,11 +53,12 @@ public class App extends Application {
     Button saveGraphButton = new Button("Guardar grafo");
     Button shortestPathButton = new Button("Ruta mas corta");
     Button addLinkButton = new Button("Añadir enlace");
+    Button dijkstraButton = new Button("Fibra optica");
 
     Button maxFlowButton = new Button("Flujo maximo");
 
     TreeSpanning tsp = new TreeSpanning();
-
+    private int[] costs;
 
 
     @Override
@@ -67,6 +69,15 @@ public class App extends Application {
         
         Label label1 = new Label("Seleccione una opción para comenzar");
         label1.setTranslateX(SCREEN_WIDTH/2 - 100);
+
+        dijkstraButton.setMaxWidth(BUTTON_WIDTH);
+        dijkstraButton.setMinWidth(BUTTON_WIDTH);
+        dijkstraButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                startDijkstra();
+            }
+        });
 
         loadGraphButton.setMaxWidth(BUTTON_WIDTH);
         loadGraphButton.setMinWidth(BUTTON_WIDTH);
@@ -177,7 +188,7 @@ public class App extends Application {
      
         mainGroup = new Group();
         
-        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton, maxFlowButton);
+        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton, maxFlowButton, dijkstraButton);
 
         Scene scene = new Scene(mainGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         
@@ -227,8 +238,8 @@ public class App extends Application {
             for( JsonElement link : links.getAsJsonArray()) {
                 String colonyBegin = link.getAsJsonObject().get("coloniaInicial").getAsString();
                 String colonyEnd = link.getAsJsonObject().get("coloniaFinal").getAsString();
-                int distance = (int) (link.getAsJsonObject().get("distancia").getAsInt()/divider);
-                int capacity = (int) (link.getAsJsonObject().get("capacidad").getAsInt()/divider);
+                int distance = (int) (link.getAsJsonObject().get("distancia").getAsInt());
+                int capacity = (int) (link.getAsJsonObject().get("capacidad").getAsInt());
                 this.links.add( new Link(colonyBegin,colonyEnd,distance,capacity) );
 
             }
@@ -250,10 +261,12 @@ public class App extends Application {
     }
 
     private void drawGraph() {
+
         int radius = 10;
         int translateX = 100;
         int translateY = 150;
         this.adjacencyMatrix = new int[this.colonies.size()+1][this.colonies.size()+1];
+        this.adjacencyMatrixDijkstra = new int[this.colonies.size()+1][this.colonies.size()+1];
         this.capacityMatrix = new int[this.colonies.size()+1][this.colonies.size()+1];
 
         Group newGroup = new Group();
@@ -271,6 +284,7 @@ public class App extends Application {
             newGroup.getChildren().add(circle);
         }
 
+
         for (Link link : links) {
             String begin = link.getColonyBegin();
             String end = link.getColonyEnd();
@@ -279,12 +293,14 @@ public class App extends Application {
             int index2 = map.get(end);
 
             this.adjacencyMatrix[index1][index2] = (int) link.getDistance();
+            this.adjacencyMatrixDijkstra[index1][index2] = (int) link.getDistance();
             this.capacityMatrix[index1][index2] = (int) link.getCapacity();
 
         }
         int[][] aux = this.adjacencyMatrix;
         for( int i = 0; i < this.adjacencyMatrix.length; i++) {
             for( int j = 0; j < this.adjacencyMatrix.length; j++) {
+                //System.out.print(adjacencyMatrix[i][j] + " ");
                 if( this.adjacencyMatrix[i][j] != 0) {
                     if( this.adjacencyMatrix[i][j] == this.adjacencyMatrix[j][i] && aux[i][j] != -1 && aux[j][i] != -1) {
                         Line line = new Line();
@@ -320,6 +336,7 @@ public class App extends Application {
 
                 }
             }
+            //System.out.println();
         }
 
 
@@ -341,7 +358,7 @@ public class App extends Application {
         }
 
 
-        newGroup.getChildren().addAll(loadGraphButton, loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton);
+        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton, dijkstraButton);
 
         Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(newScene);
@@ -355,7 +372,7 @@ public class App extends Application {
         canvas.setTranslateY(100);
         canvas.setTranslateX(10);
         Group newGroup = new Group();
-        newGroup.getChildren().addAll(canvas, loadGraphButton, loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton);
+        newGroup.getChildren().addAll(canvas, loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton, dijkstraButton);
         Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(newScene);
 
@@ -437,7 +454,7 @@ public class App extends Application {
 
             newGroup.getChildren().addAll(text, circle);
         }
-        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton,  shortestPathButton);
+        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton, dijkstraButton);
         Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(newScene);
     }
@@ -600,7 +617,7 @@ public class App extends Application {
             json += "]," + quote + "enlaces" + quote + ": [";
 
             for( Link link : links ){
-                json += "{" + quote + "coloniaInicial" + quote + ":" + quote + link.getColonyBegin() + quote + "," + quote + "coloniaFinal" + quote + ":" + quote + link.getColonyEnd() + quote + "," + quote + "distancia" + quote + ":" + (int)(link.getDistance()*divider) + "," + quote + "capacidad" + quote + ":" + (int)(link.getCapacity()*divider) + "},";
+                json += "{" + quote + "coloniaInicial" + quote + ":" + quote + link.getColonyBegin() + quote + "," + quote + "coloniaFinal" + quote + ":" + quote + link.getColonyEnd() + quote + "," + quote + "distancia" + quote + ":" + (int)(link.getDistance()) + "," + quote + "capacidad" + quote + ":" + (int)(link.getCapacity()) + "},";
             }
             json = json.substring(0, json.length() - 1);
             json += "]," + quote + "centrales" + quote + ": [";
@@ -616,6 +633,168 @@ public class App extends Application {
         catch(Exception e){
 
         }
+    }
+
+    public int[] dijkstra( Colony start, Colony end ){
+        costs = new int[colonies.size()];
+        for(int i = 0; i < colonies.size(); i++){
+            costs[i] = Integer.MAX_VALUE;
+        }
+
+        for( int i = 0; i < this.adjacencyMatrixDijkstra.length; i++){
+            for( int j = 0; j < this.adjacencyMatrixDijkstra[i].length; j++){
+                if (this.adjacencyMatrixDijkstra[i][j] == -1){
+                    this.adjacencyMatrixDijkstra[i][j] = 0;
+                }
+                //System.out.print(this.adjacencyMatrixDijkstra[i][j] + " ");
+            }
+            //System.out.println();
+        }
+
+        Queue<Colony> unvisited = new LinkedList<>();
+        unvisited.add(colonies.get(map.get(start.getName())));
+        List<Colony> visited = new ArrayList<>();
+        int index = map.get(start.getName());
+        //System.out.print(colonies.get(index).getName() + " ");
+        costs[ map.get(start.getName()) ] = 0;
+        int[] previous = new int[colonies.size() ];
+
+        for( Colony c : colonies ){
+            unvisited.add(c);
+        }
+
+
+
+        while( !unvisited.isEmpty() ){
+            index = map.get(unvisited.peek().getName());
+            //System.out.println("Index: " + index);
+            if( colonies.get(index).equals(end) ){
+                return previous;
+            }
+            for( int i = 0; i < adjacencyMatrixDijkstra[index].length - 1 ; i++){
+                if( costs[i] > costs[index] + adjacencyMatrixDijkstra[index][i] && adjacencyMatrixDijkstra[index][i] > 0 && !visited.contains(colonies.get(index))){
+                    costs[i] = costs[index] + adjacencyMatrixDijkstra[index][i];
+                    //System.out.println("New cost at index: " + i + " = " + costs[index] + adjacencyMatrixDijkstra[index][i]);
+                    previous[i] = index;
+                    visited.add(unvisited.peek());
+
+                }
+                //System.out.println(" cost at index: " + index + " = " + costs[index] + " cost at index: " + i + " = " + adjacencyMatrixDijkstra[index][i]);
+
+            }
+            unvisited.poll();
+        }
+
+
+        return previous;
+    }
+
+    private void startDijkstra(){
+        Stage newStage = new Stage();
+        Group newGroup = new Group();
+        newGroup.setTranslateX(10);
+        Scene newScene = new Scene(newGroup, 300, 300);
+
+        Label city1Label = new Label("Nombre colonia 1");
+        city1Label.setTranslateY(0);
+        TextField city1 = new TextField();
+        city1.setPromptText("Colonia");
+        city1.setTranslateY(30);
+
+        Label city2Label = new Label("Nombre colonia 2");
+        city1Label.setTranslateY(60);
+        TextField city2 = new TextField();
+        city2.setPromptText("Colonia");
+        city2.setTranslateY(90);
+
+        Button computeButton = new Button("Compute");
+        computeButton.setTranslateY(130);
+        computeButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+
+                if( !map.containsKey(city1.getText())  ){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText( city1.getText() + " no existe");
+
+                    alert.showAndWait();
+                    return;
+                }
+                if( !map.containsKey(city2.getText())  ){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText( city2.getText() + " no existe");
+
+                    alert.showAndWait();
+                    return;
+                }
+
+                drawDijkstra(city1.getText(), city2.getText());
+
+                newStage.close();
+
+            }
+        });
+        newGroup.getChildren().addAll(city1, computeButton, city1Label, city2, city2Label);
+        newStage.setScene(newScene);
+        newStage.show();
+    }
+
+    private void drawDijkstra(String city1, String city2){
+        int radius = 8;
+        int translateX = 100;
+        int translateY = 150;
+        Group newGroup = new Group();
+
+        int[] path = dijkstra(colonies.get(map.get(city1)), colonies.get(map.get(city2)));
+
+
+        int[] x = new int[path.length];
+        int[] y = new int[path.length];
+        for( int i = 1; i < path.length; i++){
+            x[i] = colonies.get(path[i]).getX();
+            y[i] = colonies.get(path[i]).getY();
+        }
+        for( int i = 1; i < x.length - 1 ; i++){
+            Line line = new Line(x[i], y[i], x[i+1], y[i+1]);
+            System.out.print(i + "->");
+            System.out.println();
+            line.setStroke(Color.PURPLE);
+            line.setStrokeWidth(5);
+            line.setTranslateX(translateX);
+            line.setTranslateY(translateY);
+            newGroup.getChildren().add(line);
+        }
+        Line lastLine = new Line();
+        lastLine.setStartX(x[x.length - 1]);
+        lastLine.setStartY(y[x.length - 1]);
+        lastLine.setEndX(colonies.get(map.get(city2)).getX());
+        lastLine.setEndY(colonies.get(map.get(city2)).getY());
+        lastLine.setStroke(Color.PURPLE);
+        lastLine.setStrokeWidth(5);
+        lastLine.setTranslateX(translateX);
+        lastLine.setTranslateY(translateY);
+        newGroup.getChildren().add(lastLine);
+
+        for( Colony colony : colonies ){
+            Circle circle = new Circle();
+            circle.setCenterX(colony.getX() + translateX);
+            circle.setCenterY(colony.getY() + translateY);
+            circle.setRadius(radius);
+            circle.setFill(Color.BLUE);
+            Text text = new Text();
+
+            text.setX(colony.getX() + translateX - 30);
+            text.setY(colony.getY() + translateY - 30);
+
+            text.setText(String.valueOf(colony.getName()));
+
+            newGroup.getChildren().addAll(text, circle);
+        }
+
+        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, shortestPathButton, maxFlowButton, dijkstraButton);
+        stage.setScene(new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT));
     }
 
     public static void main(String[] args) {
