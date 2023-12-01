@@ -712,19 +712,19 @@ public class App extends Application {
             String json = "{" + quote + "ciudad" + quote + ": { "  + quote + "colonias" + quote + ": [";
 
             for( Colony colony : colonies ){
-                json += "{" + quote + "nombre" + quote + ": " + quote + colony.getName() + quote + "," + quote + "coordenadaX" + quote + ": " + (int)colony.getX()*divider + "," + quote + "coordenadaY" + quote + ": " + (int)colony.getY()*divider + "},";
+                json += "{" + quote + "nombre" + quote + ": " + quote + colony.getName() + quote + "," + quote + "coordenadaX" + quote + ": " + (int)(colony.getX()*divider) + "," + quote + "coordenadaY" + quote + ": " + (int)(colony.getY()*divider) + "},";
             }
             json = json.substring(0, json.length() - 1);
             json += "]," + quote + "enlaces" + quote + ": [";
 
             for( Link link : links ){
-                json += "{" + quote + "coloniaInicial" + quote + ":" + quote + link.getColonyBegin() + quote + "," + quote + "coloniaFinal" + quote + ":" + quote + link.getColonyEnd() + quote + "," + quote + "distancia" + quote + ":" + (int)link.getDistance()*divider + "," + quote + "capacidad" + quote + ":" + (int)link.getCapacity()*divider + "},";
+                json += "{" + quote + "coloniaInicial" + quote + ":" + quote + link.getColonyBegin() + quote + "," + quote + "coloniaFinal" + quote + ":" + quote + link.getColonyEnd() + quote + "," + quote + "distancia" + quote + ":" + (int)(link.getDistance()*divider) + "," + quote + "capacidad" + quote + ":" + (int)(link.getCapacity()*divider) + "},";
             }
             json = json.substring(0, json.length() - 1);
             json += "]," + quote + "centrales" + quote + ": [";
 
             for( Central central : centrals ){
-                json += "{" + quote + "x" + quote + ":" + quote + (int)central.getX()*divider + quote + "," + quote + "y" + quote + ":" + quote + (int)central.getY()*divider + quote + "},";
+                json += "{" + quote + "x" + quote + ":" + quote + (int)(central.getX()*divider) + quote + "," + quote + "y" + quote + ":" + quote + (int)(central.getY()*divider) + quote + "},";
             }
             json = json.substring(0, json.length() - 1);
             json += "]}}";
