@@ -6,6 +6,7 @@ public class Link {
     double distance;
     double capacity;
 
+
     public Link(String colonyBegin, String colonyEnd, double distance, double capacity){
         this.colonyBegin = colonyBegin;
         this.colonyEnd = colonyEnd;
