@@ -11,11 +11,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -37,7 +40,7 @@ public class App extends Application {
     int SCREEN_WIDTH = 1200;
     double BUTTON_WIDTH = 120;
 
-    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 6) / 7;
+    double spacing = (SCREEN_WIDTH - BUTTON_WIDTH * 7) / 8;
     int[][] adjacencyMatrix;
     int[][] capacityMatrix;
 
@@ -47,6 +50,7 @@ public class App extends Application {
     Button deleteColonyButton = new Button("Eliminar colonia");
     Button saveGraphButton = new Button("Guardar grafo");
     Button shortestPathButton = new Button("Ruta mas corta");
+    Button addLinkButton = new Button("Añadir enlace");
 
     TreeSpanning tsp = new TreeSpanning();
 
@@ -69,9 +73,30 @@ public class App extends Application {
 
         addColonyButton.setMaxWidth(BUTTON_WIDTH);
         addColonyButton.setMinWidth(BUTTON_WIDTH);
+        addColonyButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                addColony();
+            }
+        });
+
+        addLinkButton.setMaxWidth(BUTTON_WIDTH);
+        addLinkButton.setMinWidth(BUTTON_WIDTH);
+        addLinkButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                addLink();
+            }
+        });
 
         deleteColonyButton.setMaxWidth(BUTTON_WIDTH);
         deleteColonyButton.setMinWidth(BUTTON_WIDTH);
+        deleteColonyButton.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                deleteColony();
+            }
+        });
 
         saveGraphButton.setMaxWidth(BUTTON_WIDTH);
         saveGraphButton.setMinWidth(BUTTON_WIDTH);
@@ -109,9 +134,14 @@ public class App extends Application {
         
         
         pos = pos + BUTTON_WIDTH + spacing;
+        addLinkButton.setTranslateX(pos);
+        addLinkButton.setTranslateY(50);
+
+        pos = pos + BUTTON_WIDTH + spacing;
         deleteColonyButton.setTranslateX(pos);
         deleteColonyButton.setTranslateY(50);
-        
+
+
         
         pos = pos + BUTTON_WIDTH + spacing;
         saveGraphButton.setTranslateX(pos);
@@ -131,7 +161,7 @@ public class App extends Application {
      
         mainGroup = new Group();
         
-        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton);
+        mainGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton, label1, shortestPathButton);
 
         Scene scene = new Scene(mainGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         
@@ -170,7 +200,7 @@ public class App extends Application {
                 String name = colony.getAsJsonObject().get("nombre").getAsString();
                 int x = (int) (colony.getAsJsonObject().get("coordenadaX").getAsInt()/divider);
                 int y = (int) (colony.getAsJsonObject().get("coordenadaY").getAsInt()/divider);
-                map.put(name, i);
+
                 this.colonies.add( new Colony(name, x, y));
                 i++;
             }
@@ -190,8 +220,6 @@ public class App extends Application {
                 int y = (int) (central.getAsJsonObject().get("y").getAsInt()/divider);
                 this.centrals.add( new Central( x, y ));
             }
-            this.adjacencyMatrix = new int[this.colonies.size()+1][this.colonies.size()+1];
-            this.capacityMatrix = new int[this.colonies.size()+1][this.colonies.size()+1];
 
 
             drawGraph();
@@ -206,7 +234,14 @@ public class App extends Application {
         int radius = 10;
         int translateX = 100;
         int translateY = 150;
+        this.adjacencyMatrix = new int[this.colonies.size()+1][this.colonies.size()+1];
+        this.capacityMatrix = new int[this.colonies.size()+1][this.colonies.size()+1];
+
         Group newGroup = new Group();
+
+        for( Colony colony : colonies) {
+            map.put(colony.getName(), colonies.indexOf(colony));
+        }
 
         for (Central central : centrals) {
             Circle circle = new Circle();
@@ -271,6 +306,7 @@ public class App extends Application {
 
         for (Colony colony : colonies) {
             Circle circle = new Circle();
+
             circle.setCenterX(colony.getX() + translateX);
             circle.setCenterY(colony.getY() + translateY);
             circle.setRadius(radius);
@@ -286,7 +322,7 @@ public class App extends Application {
         }
 
 
-        newGroup.getChildren().addAll(loadGraphButton, loadVoronoiDiagram, addColonyButton, deleteColonyButton, saveGraphButton, shortestPathButton);
+        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton,  shortestPathButton);
 
         Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(newScene);
@@ -300,7 +336,7 @@ public class App extends Application {
         canvas.setTranslateY(100);
         canvas.setTranslateX(10);
         Group newGroup = new Group();
-        newGroup.getChildren().addAll(canvas, loadGraphButton, loadVoronoiDiagram, addColonyButton, deleteColonyButton, saveGraphButton, shortestPathButton);
+        newGroup.getChildren().addAll(canvas, loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton,  shortestPathButton);
 
         Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(newScene);
@@ -329,7 +365,7 @@ public class App extends Application {
             y[tsp.solution.indexOf(colony)] = colony.getY() ;
 
         }
-        for( int i = 0; i < x.length - 1 ; i++ ){
+        for( int i = 0; i < x.length - 2 ; i++ ){
             Line line = new Line();
             line.setStartX(x[i] + translateX);
 
@@ -339,11 +375,13 @@ public class App extends Application {
 
             line.setEndY(y[i+1] + translateY);
 
+            //System.out.println(x[i] + " " + y[i]);
+            //System.out.println(x[i+1] + " " + y[i+1]);
             Text text = new Text();
 
-            text.setX(x[i] + translateX + 30);
+            text.setX(x[i] + translateX + 20);
             text.setY(y[i] + translateY + 10);
-
+            text.setFont( new Font("Arial", 18));
             text.setText(String.valueOf(i));
 
             line.setStroke(Color.PURPLE);
@@ -353,13 +391,18 @@ public class App extends Application {
         Line line = new Line();
         line.setStartX(x[0] + translateX);
         line.setStartY(y[0] + translateY);
-        line.setEndX(x[x.length - 1] + translateX);
-        line.setEndY(y[y.length - 1] + translateY);
-
+        line.setEndX(x[x.length - 2] + translateX);
+        line.setEndY(y[y.length - 2] + translateY);
+        Text lastText = new Text();
+        lastText.setX(x[x.length - 2] + translateX + 20);
+        lastText.setY(y[y.length - 2] + translateY + 10);
+        lastText.setFont( new Font("Arial", 18));
+        lastText.setText(String.valueOf(x.length - 2));
 
         line.setStroke(Color.PURPLE);
         line.setStrokeWidth(3);
-        //newGroup.getChildren().add( line);
+        newGroup.getChildren().add( line);
+        newGroup.getChildren().add(lastText);
         for( Colony colony : tsp.solution ){
             Circle circle = new Circle();
             circle.setCenterX(colony.getX() + translateX);
@@ -375,9 +418,142 @@ public class App extends Application {
 
             newGroup.getChildren().addAll(text, circle);
         }
-        newGroup.getChildren().addAll(loadGraphButton, loadVoronoiDiagram, addColonyButton, deleteColonyButton, saveGraphButton, shortestPathButton);
+        newGroup.getChildren().addAll(loadGraphButton,loadVoronoiDiagram, addColonyButton, addLinkButton, deleteColonyButton, saveGraphButton,  shortestPathButton);
         Scene newScene = new Scene(newGroup, SCREEN_WIDTH, SCREEN_HEIGHT);
         stage.setScene(newScene);
+    }
+
+    private void addColony(){
+        Stage newStage = new Stage();
+        Group newGroup = new Group();
+        newGroup.setTranslateX(10);
+        Scene newScene = new Scene(newGroup, 500, 500);
+        Label nameLabel = new Label("Nombre");
+        nameLabel.setTranslateY(50);
+        Label xLabel = new Label("Coordenada X ");
+        xLabel.setTranslateY(150);
+        Label yLabel = new Label("Coordenada Y");
+        yLabel.setTranslateY(250);
+        TextField name = new TextField();
+        name.setPromptText("Name");
+        name.setTranslateY(100);
+        TextField x = new TextField();
+        x.setPromptText("X");
+        x.setTranslateY(200);
+        TextField y = new TextField();
+        y.setPromptText("Y");
+        y.setTranslateY(300);
+        Button addButton = new Button("Add");
+        addButton.setTranslateY(400);
+        addButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                colonies.add(new Colony(name.getText(), Integer.parseInt(x.getText()), Integer.parseInt(y.getText())));
+                newStage.close();
+                drawGraph();
+            }
+        });
+        newGroup.getChildren().addAll(name, x, y, addButton, nameLabel, xLabel, yLabel);
+        newStage.setScene(newScene);
+        newStage.show();
+    }
+
+    private void addLink(){
+        Stage newStage = new Stage();
+        Group newGroup = new Group();
+        newGroup.setTranslateX(10);
+        Scene newScene = new Scene(newGroup, 500, 500);
+
+        Label city1Label = new Label("Nombre ciudad 1");
+        city1Label.setTranslateY(0);
+        Label city2Label = new Label("Nombre ciudad 2");
+        city2Label.setTranslateY(40);
+        Label distanceLabel = new Label("Distancia");
+        distanceLabel.setTranslateY(80);
+        Label capacityLabel = new Label("Capacidad");
+        capacityLabel.setTranslateY(120);
+        TextField city1 = new TextField();
+        city1.setPromptText("Nombre ciudad 1");
+        city1.setTranslateY(20);
+        TextField city2 = new TextField();
+        city2.setPromptText("Nombre ciudad 2");
+        city2.setTranslateY(60);
+        TextField distance = new TextField();
+        distance.setPromptText("Distancia");
+        distance.setTranslateY(100);
+        TextField capacity = new TextField();
+        capacity.setPromptText("Capacidad");
+        capacity.setTranslateY(140);
+
+
+        Button addButton = new Button("Add");
+        addButton.setTranslateY(400);
+        addButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+
+                if( !map.containsKey(city1.getText())  ){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText( city1.getText() + " no existe");
+
+                    alert.showAndWait();
+                    return;
+                }
+                if( !map.containsKey(city2.getText()) ){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText(city2.getText() + " no existe");
+
+                    alert.showAndWait();
+                    return;
+                }
+
+                links.add(new Link(city1.getText(), city2.getText(), Integer.parseInt(distance.getText()), Integer.parseInt(capacity.getText())));
+                newStage.close();
+                drawGraph();
+            }
+        });
+            newGroup.getChildren().addAll(city1, city2, distance, capacity, addButton, city1Label, city2Label, distanceLabel, capacityLabel);
+        newStage.setScene(newScene);
+        newStage.show();
+    }
+
+    private void deleteColony(){
+        Stage newStage = new Stage();
+        Group newGroup = new Group();
+        newGroup.setTranslateX(10);
+        Scene newScene = new Scene(newGroup, 300, 300);
+
+        Label city1Label = new Label("Nombre colonia a eliminar");
+        city1Label.setTranslateY(0);
+        TextField city1 = new TextField();
+        city1.setPromptText("Colonia");
+        city1.setTranslateY(30);
+
+        Button addButton = new Button("Delete");
+        addButton.setTranslateY(50);
+        addButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+
+                if( !map.containsKey(city1.getText())  ){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText( city1.getText() + " no existe");
+
+                    alert.showAndWait();
+                    return;
+                }
+
+                links.add(new Link(city1.getText(), city2.getText(), Integer.parseInt(distance.getText()), Integer.parseInt(capacity.getText())));
+                newStage.close();
+                drawGraph();
+            }
+        });
+        newGroup.getChildren().addAll(city1, city2, distance, capacity, addButton, city1Label, city2Label, distanceLabel, capacityLabel);
+        newStage.setScene(newScene);
+        newStage.show();
     }
 
     public static void main(String[] args) {
