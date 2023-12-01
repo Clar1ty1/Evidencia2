@@ -1,8 +1,8 @@
 package com.jose.evidencia2;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -18,7 +18,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -33,6 +32,7 @@ public class App extends Application {
     ArrayList<Colony> colonies = new ArrayList<Colony>();
     ArrayList<Central> centrals = new ArrayList<Central>();
     ArrayList<Link> links = new ArrayList<Link>();
+    Map<String, Integer> map = new HashMap<String, Integer>();
     Group mainGroup;
     Stage stage;
     double SCREEN_HEIGHT = 800;
@@ -132,11 +132,12 @@ public class App extends Application {
             JsonElement colonies = cities.getAsJsonObject().get("colonias");
             JsonElement links = cities.getAsJsonObject().get("enlaces");
             JsonElement centrals = cities.getAsJsonObject().get("centrales");
-
+            int i = 0;
             for( JsonElement colony : colonies.getAsJsonArray()) {
                 String name = colony.getAsJsonObject().get("nombre").getAsString();
                 int x = (int) (colony.getAsJsonObject().get("coordenadaX").getAsInt()/divider);
                 int y = (int) (colony.getAsJsonObject().get("coordenadaY").getAsInt()/divider);
+                map.put(name, i);
                 this.colonies.add( new Colony(name, x, y));
 
             }
@@ -159,8 +160,8 @@ public class App extends Application {
             this.adjacencyMatrix = new double[this.colonies.size()][this.colonies.size()];
             TreeSpanning tsp = new TreeSpanning();
             tsp.solveTsp(this.colonies);
-            tsp.mostrarRuta(tsp.solution, tsp.calcularDistanciaTotal(tsp.solution));
-            //drawGraph();
+
+            drawGraph();
 
         }
         catch (IOException ex) {

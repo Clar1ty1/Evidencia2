@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class TreeSpanning {
     boolean solutionPrinted = false;
-    public List<Colony> solution = new ArrayList<>();
+    public List< Colony > solution = new ArrayList<>();
     public void solveTsp(List<Colony> colonias) {
         Set<Colony> coloniasRestantes = new HashSet<>(colonias);
         List<Colony> rutaActual = new ArrayList<>();
@@ -30,14 +30,11 @@ public class TreeSpanning {
 
             if( !solutionPrinted ) {
                 this.solutionPrinted = true;
-                // Todas las colonias han sido visitadas, regresa a la colonia de inicio
                 distanciaParcial += actual.computeDistance(rutaActual.get(0));
                 rutaActual.add(rutaActual.get(0));  // Agrega la colonia de inicio al final de la ruta
-                this.solution = rutaActual;
-                mostrarRuta(solution, calcularDistanciaTotal(solution));
+                mostrarRuta(rutaActual, distanciaParcial);
             }
-            else return;
-            mostrarRuta(solution, calcularDistanciaTotal(solution));
+
             return;
         }
 
@@ -67,11 +64,10 @@ public class TreeSpanning {
     }
 
     public void mostrarRuta(List<Colony> ruta, double distancia) {
-        for( Colony colony : ruta) {
-            System.out.print(colony.getName() + " ");
-        }
-        System.out.println();
 
-        System.out.println("Distancia total: " + distancia);
+        for( Colony colony : ruta) {
+            this.solution.add(colony);
+        }
+
     }
 }
