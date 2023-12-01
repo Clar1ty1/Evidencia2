@@ -89,15 +89,6 @@ public class App extends Application {
             }
         });
 
-        pos = pos + BUTTON_WIDTH + spacing;
-        loadVoronoiDiagram.setTranslateX(pos);
-        loadVoronoiDiagram.setTranslateY(50);
-        loadVoronoiDiagram.setOnAction( new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                drawVoronoi();
-            }
-        });
         
         pos = pos + BUTTON_WIDTH + spacing;
         addColony.setTranslateX(pos);
@@ -111,6 +102,16 @@ public class App extends Application {
         pos = pos + BUTTON_WIDTH + spacing;
         saveGraph.setTranslateX(pos);
         saveGraph.setTranslateY(50);
+
+        pos = pos + BUTTON_WIDTH + spacing;
+        loadVoronoiDiagram.setTranslateX(pos);
+        loadVoronoiDiagram.setTranslateY(50);
+        loadVoronoiDiagram.setOnAction( new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                drawVoronoi();
+            }
+        });
      
         mainGroup = new Group();
         
