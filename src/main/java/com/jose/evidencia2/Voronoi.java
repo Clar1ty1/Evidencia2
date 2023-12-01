@@ -69,14 +69,6 @@ public class Voronoi {
             gc.fillOval(central.getX(), central.getY(), 8, 8);
         }
 
-        /*
-        Group voronoiGroup = new Group(canvas);
-
-        stage.setScene(new Scene(voronoiGroup));
-        stage.show();
-        */
-
-
         return canvas;
     }
 

@@ -15,4 +15,10 @@ public class Colony {
     public int getX() { return x; }
     public int getY() { return y; }
 
+    public double computeDistance(Colony otraColonia) {
+        int deltaX = this.x - otraColonia.x;
+        int deltaY = this.y - otraColonia.y;
+        return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    }
+
 }
